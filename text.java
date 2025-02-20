@@ -5,11 +5,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class text {
-    public static void main(String[] args) {
+    public static void main(String[] args) { // 진입부분
         // 이게 있어야 이 클래스를 실행했을 때 작동을 함
         // 웹훅을 만들 거임 -> URL 필요함
         // 환경변수로 받아올 것임 -> yml 파일에서 전달하게
         String webhookUrl = System.getenv("SLACK_WEBHOOK_URL");
+        String message = System.getenv("SLACK_WEBHOOK_MSG");
 
         // Java 11 -> fetch
         HttpClient client = HttpClient.newHttpClient();
@@ -17,9 +18,10 @@ public class text {
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(webhookUrl))
             .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString("{\"text\":\"테스트 메시지\"}")) 
+            // .POST(HttpRequest.BodyPublishers.ofString("{\"text\":\"테스트 메시지\"}")) 
+            .POST(HttpRequest.BodyPublishers.ofString("{\"text\":\" + " + message + "\"}")) 
             .build();
-            
+        
         try {
             HttpResponse<String> response = client.send(
                 request, HttpResponse.BodyHandlers.ofString()
