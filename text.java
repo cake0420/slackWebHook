@@ -20,7 +20,7 @@ public class text {
             "  \"contents\": [\n" +
             "    {\n" +
             "      \"parts\": [\n" +
-            "        {\"text\": \"유튜브 짐승 친구들 땅땅이가 자기소개하는 내용 적어줘\"}\n" +
+            "        {\"text\": \"유튜브 찔툰 영상의 짐승 친구들 땅땅이가 자기소개하는 내용 적어줘 땅땅이는 고양이고 짐승친구들의 마스코트 고양이야 \"}\n" +
             "      ]\n" +
             "    }\n" +
             "  ]\n" +
@@ -58,7 +58,7 @@ public class text {
                 String geminiText = extractTextFromGeminiResponse(geminiResponseBody);
                 System.out.println("Gemini Response Text: " + geminiText);
 
-                String slackMessageBody = "{\"text\": \"" + slackMessage + " " + geminiText + "\"}";
+                String slackMessageBody = "{\"text\": \"" + slackMessage + "/n" + geminiText + "\"}";
 
                 HttpRequest slackRequest = HttpRequest.newBuilder()
                     .uri(URI.create(webhookUrl))
