@@ -23,3 +23,4 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_MSG: ${{ secrets.SLACK_WEBHOOK_MSG }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
