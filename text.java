@@ -53,20 +53,25 @@ public class text {
 
             // 응답이 성공적이면
             if (geminiResponse.statusCode() == 200) {
-                // Gemini 응답을 Slack 메시지로 전송
+                // Gemini 응답을 처리합니다.
                 String geminiResponseBody = geminiResponse.body();
-                System.out.println("Gemini Response: " + geminiResponseBody);
+
+                // 응답을 JSON 형식에서 텍스트만 추출
+                String geminiText = extractTextFromGeminiResponse(geminiResponseBody);
+                System.out.println("Gemini Response Text: " + geminiText);
 
                 // Slack 웹훅 URL로 메시지를 보냅니다.
+                String slackMessageBody = "{\"text\": \"" + slackMessage + " " + geminiText + "\"}";
+
                 HttpRequest slackRequest = HttpRequest.newBuilder()
                     .uri(URI.create(webhookUrl))
                     .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString("{\"text\": \"" + slackMessage + " " + geminiResponseBody + "\"}"))
+                    .POST(HttpRequest.BodyPublishers.ofString(slackMessageBody))
                     .build();
 
                 // Slack 메시지 전송
                 HttpResponse<String> slackResponse = client.send(slackRequest, HttpResponse.BodyHandlers.ofString());
-                
+
                 // Slack 메시지 전송 성공 여부 확인
                 if (slackResponse.statusCode() == 200) {
                     System.out.println("Slack 메시지가 성공적으로 전송되었습니다!");
@@ -80,4 +85,26 @@ public class text {
             e.printStackTrace();
         }
     }
+
+    // Gemini API 응답에서 텍스트 부분을 추출하는 메서드
+    private static String extractTextFromGeminiResponse(String geminiResponseBody) {
+        // Gemini 응답에서 실제 텍스트 추출
+        String text = "";
+        try {
+            // JSON 파싱 라이브러리 (예: org.json 또는 Gson 사용)
+            org.json.JSONObject responseJson = new org.json.JSONObject(geminiResponseBody);
+            String candidateText = responseJson.getJSONArray("candidates")
+                                               .getJSONObject(0)
+                                               .getJSONObject("content")
+                                               .getJSONArray("parts")
+                                               .getJSONObject(0)
+                                               .getString("text");
+            text = candidateText;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return text;
+    }
+    
 }
+
