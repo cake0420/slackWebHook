@@ -1,7 +1,7 @@
 name: send message
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   send-message:
@@ -16,10 +16,15 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Install JSON Library
+        run: |
+          mkdir -p lib
+          curl -o lib/json-20210307.jar https://repo1.maven.org/maven2/org/json/json/20210307/json-20210307.jar
+
       - name: Compile and Run Bot
         run: |
-          javac text.java
-          java text
+          javac -cp .:lib/json-20210307.jar text.java
+          java -cp .:lib/json-20210307.jar text
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_MSG: ${{ secrets.SLACK_WEBHOOK_MSG }}

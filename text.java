@@ -1,9 +1,8 @@
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-
+import org.json.JSONObject;
 public class text {
     public static void main(String[] args) { // 진입부분
         // 이게 있어야 이 클래스를 실행했을 때 작동을 함
@@ -18,9 +17,13 @@ public class text {
 
         // 요청 본문 형식 (curl 요청에 맞게 수정)
         String messageRequest = "{\n" +
-            "  \"contents\": [{\n" +
-            "    \"parts\": [{\"text\": \"유튜브 짐승 친구들 땅땅이가 자기소개하는 내용 적어줘\"}]\n" +
-            "  }]\n" +
+            "  \"contents\": [\n" +
+            "    {\n" +
+            "      \"parts\": [\n" +
+            "        {\"text\": \"유튜브 짐승 친구들 땅땅이가 자기소개하는 내용 적어줘\"}\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  ]\n" +
             "}";
         // Java 11 -> fetch
         HttpClient client = HttpClient.newHttpClient();
@@ -48,19 +51,13 @@ public class text {
         // }
 
         try {
-            // Gemini API 요청을 보내고 응답을 받습니다.
             HttpResponse<String> geminiResponse = client.send(geminiRequest, HttpResponse.BodyHandlers.ofString());
 
-            // 응답이 성공적이면
             if (geminiResponse.statusCode() == 200) {
-                // Gemini 응답을 처리합니다.
                 String geminiResponseBody = geminiResponse.body();
-
-                // 응답을 JSON 형식에서 텍스트만 추출
                 String geminiText = extractTextFromGeminiResponse(geminiResponseBody);
                 System.out.println("Gemini Response Text: " + geminiText);
 
-                // Slack 웹훅 URL로 메시지를 보냅니다.
                 String slackMessageBody = "{\"text\": \"" + slackMessage + " " + geminiText + "\"}";
 
                 HttpRequest slackRequest = HttpRequest.newBuilder()
@@ -69,10 +66,8 @@ public class text {
                     .POST(HttpRequest.BodyPublishers.ofString(slackMessageBody))
                     .build();
 
-                // Slack 메시지 전송
                 HttpResponse<String> slackResponse = client.send(slackRequest, HttpResponse.BodyHandlers.ofString());
 
-                // Slack 메시지 전송 성공 여부 확인
                 if (slackResponse.statusCode() == 200) {
                     System.out.println("Slack 메시지가 성공적으로 전송되었습니다!");
                 } else {
@@ -80,26 +75,23 @@ public class text {
                 }
             } else {
                 System.err.println("Gemini API 오류: 상태 코드 " + geminiResponse.statusCode());
+                System.err.println("Gemini API 응답: " + geminiResponse.body()); // 오류 메시지 출력 추가
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // Gemini API 응답에서 텍스트 부분을 추출하는 메서드
     private static String extractTextFromGeminiResponse(String geminiResponseBody) {
-        // Gemini 응답에서 실제 텍스트 추출
         String text = "";
         try {
-            // JSON 파싱 라이브러리 (예: org.json 또는 Gson 사용)
-            org.json.JSONObject responseJson = new org.json.JSONObject(geminiResponseBody);
-            String candidateText = responseJson.getJSONArray("candidates")
-                                               .getJSONObject(0)
-                                               .getJSONObject("content")
-                                               .getJSONArray("parts")
-                                               .getJSONObject(0)
-                                               .getString("text");
-            text = candidateText;
+            JSONObject responseJson = new JSONObject(geminiResponseBody);
+            text = responseJson.getJSONArray("candidates")
+                               .getJSONObject(0)
+                               .getJSONObject("content")
+                               .getJSONArray("parts")
+                               .getJSONObject(0)
+                               .getString("text");
         } catch (Exception e) {
             e.printStackTrace();
         }
