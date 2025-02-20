@@ -10,11 +10,18 @@ public class text {
         // 웹훅을 만들 거임 -> URL 필요함
         // 환경변수로 받아올 것임 -> yml 파일에서 전달하게
         String webhookUrl = System.getenv("SLACK_WEBHOOK_URL");
-        String message = System.getenv("SLACK_WEBHOOK_MSG");
-        String apiKey = System.getenv("GEMINI_API_KEY");  // Get the API key from the environment variables
-        String apiUrl = "https://api.gemini.com/v1/some-endpoint"; // Replace with actual Gemini API URL
-        String messageRequest = "{\"prompt\": \"유튜브 짐승 친구들 땅땅이가 자기소개하는 내용 적어줘\"}";  // Example payload to send to Gemini
+        String slackMessage = System.getenv("SLACK_WEBHOOK_MSG");
+        String apiKey = System.getenv("GEMINI_API_KEY");  // Gemini API 키
 
+        // Gemini API URL을 수정하여 API 키를 포함합니다.
+        String apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
+
+        // 요청 본문 형식 (curl 요청에 맞게 수정)
+        String messageRequest = "{\n" +
+            "  \"contents\": [{\n" +
+            "    \"parts\": [{\"text\": \"유튜브 짐승 친구들 땅땅이가 자기소개하는 내용 적어줘\"}]\n" +
+            "  }]\n" +
+            "}";
         // Java 11 -> fetch
         HttpClient client = HttpClient.newHttpClient();
         // 요청을 얹힐 거다
@@ -27,8 +34,7 @@ public class text {
         HttpRequest geminiRequest = HttpRequest.newBuilder()
             .uri(URI.create(apiUrl))
             .header("Content-Type", "application/json")
-            .header("Authorization", "Bearer " + apiKey) // Passing API Key for Authorization
-            .POST(HttpRequest.BodyPublishers.ofString(messageRequest)) // Sending the request body (prompt)
+            .POST(HttpRequest.BodyPublishers.ofString(messageRequest)) // 요청 본문
             .build();
         
         // try {
@@ -47,7 +53,7 @@ public class text {
 
             // 응답이 성공적이면
             if (geminiResponse.statusCode() == 200) {
-                // Gemini 응답을 출력 (Slack으로 보낼 메시지)
+                // Gemini 응답을 Slack 메시지로 전송
                 String geminiResponseBody = geminiResponse.body();
                 System.out.println("Gemini Response: " + geminiResponseBody);
 
@@ -55,7 +61,7 @@ public class text {
                 HttpRequest slackRequest = HttpRequest.newBuilder()
                     .uri(URI.create(webhookUrl))
                     .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString("{\"text\": \"" + message + "\n" + geminiResponseBody + "\"}"))
+                    .POST(HttpRequest.BodyPublishers.ofString("{\"text\": \"" + slackMessage + " " + geminiResponseBody + "\"}"))
                     .build();
 
                 // Slack 메시지 전송
