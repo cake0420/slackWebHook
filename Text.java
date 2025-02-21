@@ -25,7 +25,7 @@ public class Text {
         String apiKey = System.getenv("GEMINI_API_KEY");  // Gemini API 키
         String json = WeatherAPI(weatherApiKey);
         String weatherResponse = extractTextFromWeatherResponse(json);
-
+        System.out.println(apiKey);
         System.out.println(json);
 //         Gemini API URL을 수정하여 API 키를 포함합니다.
         String apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey;
