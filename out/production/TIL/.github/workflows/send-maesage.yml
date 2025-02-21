@@ -25,8 +25,8 @@ jobs:
 
       - name: Compile and Run Bot
         run: |
-          javac -cp .:lib/json-20210307.jar text.java
-          java -cp .:lib/json-20210307.jar text
+          javac -cp .:lib/json-20210307.jar Text.java
+          java -cp .:lib/json-20210307.jar Text
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
