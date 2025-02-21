@@ -18,15 +18,10 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Install JSON Library
+      - name: Compile and Run Text
         run: |
-          mkdir -p lib
-          curl -o lib/json-20210307.jar https://repo1.maven.org/maven2/org/json/json/20210307/json-20210307.jar
-
-      - name: Compile and Run Bot
-        run: |
-          javac -cp .:lib/json-20210307.jar Text.java
-          java -cp .:lib/json-20210307.jar Text
+          javac Text.java
+          java Text
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
