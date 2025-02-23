@@ -11,11 +11,14 @@ import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 public class Text {
-    public static void main(String[] args) throws IOException { // 진입부분
+    public static void main(String[] args) throws IOException, ParseException { // 진입부분
         // 이게 있어야 이 클래스를 실행했을 때 작동을 함
         // 웹훅을 만들 거임 -> URL 필요함
         // 환경변수로 받아올 것임 -> yml 파일에서 전달하게
@@ -177,17 +180,34 @@ public class Text {
             default: return ""; // Or handle unknown categories
         }
     }
-    public static String WeatherAPI(String weatherApiKey) throws IOException {
-        LocalDate now = LocalDate.now();
+    public static String WeatherAPI(String weatherApiKey) throws IOException, ParseException {
+        // Get the current date
+        LocalDate today = LocalDate.now();
+        System.out.println("Today's date: " + today);
+
+        // Format the date in "yyyyMMdd" format
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        String date = now.format(formatter);
-        System.out.println(date);
+        String date = today.format(formatter);
+
+        // Parse the date back into a Date object using SimpleDateFormat
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+        Date todayDate = simpleDateFormat.parse(date);
+
+        // Output the parsed date
+        System.out.println("Parsed date: " + todayDate);
+
+        // Add 1 day to the current date using LocalDate's plusDays method
+        LocalDate tomorrow = today.plusDays(1);
+        String koreaDate = tomorrow.format(formatter);
+
+        // Output the date of tomorrow
+        System.out.println("Tomorrow's date: " + koreaDate);
         StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst"); /*URL*/
         urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + weatherApiKey); /*Service Key*/
         urlBuilder.append("&" + URLEncoder.encode("pageNo","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지번호*/
         urlBuilder.append("&" + URLEncoder.encode("numOfRows","UTF-8") + "=" + URLEncoder.encode("1000", "UTF-8")); /*한 페이지 결과 수*/
         urlBuilder.append("&" + URLEncoder.encode("dataType","UTF-8") + "=" + URLEncoder.encode("JSON", "UTF-8")); /*요청자료형식(XML/JSON) Default: XML*/
-        urlBuilder.append("&" + URLEncoder.encode("base_date","UTF-8") + "=" + URLEncoder.encode(date, "UTF-8"));
+        urlBuilder.append("&" + URLEncoder.encode("base_date","UTF-8") + "=" + URLEncoder.encode(koreaDate, "UTF-8"));
         urlBuilder.append("&" + URLEncoder.encode("base_time","UTF-8") + "=" + URLEncoder.encode("0600", "UTF-8")); /*06시 발표(정시단위) */
         urlBuilder.append("&" + URLEncoder.encode("nx","UTF-8") + "=" + URLEncoder.encode("62", "UTF-8")); /*예보지점의 X 좌표값*/
         urlBuilder.append("&" + URLEncoder.encode("ny","UTF-8") + "=" + URLEncoder.encode("125", "UTF-8")); /*예보지점의 Y 좌표값*/
